@@ -126,6 +126,7 @@ const removeRow = (id) => {
     return rule?.operators || [];
   }, []);
 
+  
   return (
     <div className=" pl-12 pr-4 p-2">
       
@@ -133,9 +134,11 @@ const removeRow = (id) => {
 const selectedRuleConfig = EligibilityRulesData.find((config) => config.value === row.rule);
 const data = selectedRuleConfig ? selectedRuleConfig.data : [];
 const operators = selectedRuleConfig ? selectedRuleConfig.operators : [];
-        
+// console.log("Line height:", lineStyles[row.id]?.height);
+  
         return(
-        <div key={row.id} id={`row-${row.id}`} className=''>
+        <div key={row.id} id={`row-${row.id}`} className='relative'>
+        {index===0 &&  <div className="bg-white h-5 w-5 absolute z-10 -left-10"></div>}
         <div className="relative gap-2 flex items-center">
           {/* Vertical connecting line UI -start */}
        
@@ -145,21 +148,28 @@ const operators = selectedRuleConfig ? selectedRuleConfig.operators : [];
               className="absolute -left-12"
               style={{ height: `${lineStyles[row.id]?.height || 50}px`, top: "-25px" }}
             >
-              <div className="relative h-full w-10">
+
+              <div className="relative min-h-[1px] w-10">
                 {/* Vertical Line controlled by JS --start*/}
-                <div
-                  className="absolute translate-y-6 -top-16 left-1/2  w-[1.5px] bg-[#D9D9D9] transform -translate-x-1/2"
-                  style={{ minHeight: "92px", height: "100%", 
-                 }}
-                ></div>
+               <div
+                  className="absolute left-1/2 translate-y-6 -top-16 w-[1.5px] bg-[#D9D9D9] transform -translate-x-1/2"
+                  style={{ 
+                    minHeight: "92px", 
+                  height: "100%", 
+                  }}
+                ></div> 
+
+
                 <div
                   className="absolute -translate-y-5 left-1/2 -bottom-10 w-[1.5px] bg-[#D9D9D9] transform -translate-x-1/2"
                   style={{ height: "100%" }}
-                ></div>
+                ></div> 
+
+
                 {/* Vertical Line controlled by JS --end */}
 
                 {/* "AND" Text */}
-                <div className="absolute left-1/2 top-2 transform -translate-x-1/2 -translate-y-1 bg-white px-1 z-10">
+                <div className="absolute left-1/2 top-1 transform -translate-x-1/2 -translate-y-1 bg-white px-1 z-10">
                   <span className="text-[#595959] font-medium whitespace-nowrap">AND</span>
                 </div>
               </div>
