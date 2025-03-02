@@ -148,8 +148,9 @@ const operators = selectedRuleConfig ? selectedRuleConfig.operators : [];
               <div className="relative h-full w-10">
                 {/* Vertical Line controlled by JS --start*/}
                 <div
-                  className="absolute translate-y-5 left-1/2 -top-16 w-[1.5px] bg-[#D9D9D9] transform -translate-x-1/2"
-                  style={{ minHeight: "92px", height: "100%" }}
+                  className="absolute translate-y-6 -top-16 left-1/2  w-[1.5px] bg-[#D9D9D9] transform -translate-x-1/2"
+                  style={{ minHeight: "92px", height: "100%", 
+                 }}
                 ></div>
                 <div
                   className="absolute -translate-y-5 left-1/2 -bottom-10 w-[1.5px] bg-[#D9D9D9] transform -translate-x-1/2"
