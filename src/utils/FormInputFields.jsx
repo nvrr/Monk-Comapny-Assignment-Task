@@ -114,7 +114,8 @@ export const OptionsInput = ({
 export const SelectMultiOptionsInput = ({
   values=[],
   setValues,
-  data=[]
+  data=[],
+  placeholder
 }) => {
   const [searchText, setSearchText] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -171,7 +172,7 @@ return (
         <LuSearch className="text-gray-400 mr-1 mt-1" size={18}/>
       <input
         type="text"
-        placeholder="Select Collection"
+        placeholder={placeholder}
         className="w-full p-0 focus:outline-none h-[38.5px] focus:outline-none focus:border-[#8A8A8A]"
         value={searchText}
         onChange={(e) => setSearchText(e.target.value)}

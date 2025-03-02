@@ -256,7 +256,7 @@ const operators = selectedRuleConfig ? selectedRuleConfig.operators : [];
           values={row.collections}
           setValues={(value) => updateRow(row.id, "collections", value)}
           data={EligibilityRulesData.find((config) => config.value === row.rule)?.data || []}
-            
+          placeholder='Search collections'
           />}
 
 {(row.rule === "productTags") 
@@ -264,7 +264,7 @@ const operators = selectedRuleConfig ? selectedRuleConfig.operators : [];
           values={row.productTags}
           setValues={(value) => updateRow(row.id, "productTags", value)}
           data={EligibilityRulesData.find((config) => config.value === row.rule)?.data || []}
-            
+          placeholder='Search product tags'
           />}
 
 {(row.rule === "specificProduct") 
@@ -272,7 +272,7 @@ const operators = selectedRuleConfig ? selectedRuleConfig.operators : [];
           values={row.products}
           setValues={(value) => updateRow(row.id, "products", value)}
           data={EligibilityRulesData.find((config) => config.value === row.rule)?.data || []}
-            
+          placeholder='Search product'
           />}
 
           { (row.rule==="productSubscribed") &&
