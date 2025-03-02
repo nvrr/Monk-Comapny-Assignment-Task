@@ -146,11 +146,16 @@ const operators = selectedRuleConfig ? selectedRuleConfig.operators : [];
               style={{ height: `${lineStyles[row.id]?.height || 50}px`, top: "-25px" }}
             >
               <div className="relative h-full w-10">
-                {/* Vertical Line controlled by JS */}
+                {/* Vertical Line controlled by JS --start*/}
                 <div
-                  className="absolute left-1/2 -top-10 w-[1.5px] bg-[#D9D9D9] transform -translate-x-1/2"
+                  className="absolute translate-y-5 left-1/2 -top-16 w-[1.5px] bg-[#D9D9D9] transform -translate-x-1/2"
+                  style={{ minHeight: "92px", height: "100%" }}
+                ></div>
+                <div
+                  className="absolute -translate-y-5 left-1/2 -bottom-10 w-[1.5px] bg-[#D9D9D9] transform -translate-x-1/2"
                   style={{ height: "100%" }}
                 ></div>
+                {/* Vertical Line controlled by JS --end */}
 
                 {/* "AND" Text */}
                 <div className="absolute left-1/2 top-2 transform -translate-x-1/2 -translate-y-1 bg-white px-1 z-10">
