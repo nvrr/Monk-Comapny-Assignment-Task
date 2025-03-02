@@ -1,0 +1,43 @@
+/* Wrapper to center the content */
+.wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f4f4f4;
+  }
+  
+  /* Letter container with folded effect */
+  .letter-container {
+    position: relative;
+    width: 300px;
+    height: 200px;
+    background: white;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    transform-origin: top;
+    animation: unfold 1s ease-in-out forwards;
+  }
+  
+  /* Inner content */
+  .letter-content {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: opacity 0.8s ease-in-out 0.5s, transform 0.8s ease-in-out 0.5s;
+  }
+  
+  /* Animation to open the letter */
+  @keyframes unfold {
+    0% {
+      transform: scaleY(0);
+    }
+    100% {
+      transform: scaleY(1);
+    }
+  }
+  
+  /* Make content visible after unfolding */
+  .letter-container.show .letter-content {
+    opacity: 1;
+    transform: translateY(0);
+  }
