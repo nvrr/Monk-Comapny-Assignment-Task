@@ -77,17 +77,6 @@ export default function EligibilityRules() {
   });
 };
 
-const updateRow = useCallback((id, field, value) => {
-  setRows((prevRows) => {
-    const updatedRows = prevRows.map(row => ({
-      ...row,
-      [field]: value,  // Apply the same value to all rows
-    }));
-    return updatedRows;
-  });
-}, []);
-
-
 // Function to add a new rule row
 const addRow = useCallback(() => {
   setRows((prevRows) => {
@@ -118,15 +107,28 @@ const addRow = useCallback(() => {
   });
 }, []);
 
-// Remove row function
+// Remove rule row 
 const removeRow = (id) => {
   setRows((prevRows) => {
     const updatedRows = prevRows.filter((row) => row.id !== id);
-    return updatedRows;
+    return sortRowsByPriority(updatedRows);
   },[]);
 };
 
+// update rule row
+const updateRow = useCallback((id, field, value) => {
+  setRows((prevRows) => {
+    const updatedRows = prevRows.map(row =>
+      row.id === id ? { ...row, [field]: value } : row
+    );
 
+    if (field === "rule") {
+      return sortRowsByPriority(updatedRows); // Sort after rule update
+    }
+
+    return updatedRows;
+  });
+}, []);
 
   const getOperators = useCallback((ruleId) => {
     const rule = EligibilityRulesData.find((rule) => rule.value === ruleId);
@@ -351,19 +353,44 @@ const operators = selectedRuleConfig ? selectedRuleConfig.operators : [];
   
       {/* display selected collections, products, product tags  --start */}
       <div className="flex flex-wrap gap-2 items-center mt-2 mb-5 pl-2">
-  {["collections", "products", "productTags"].map((key) => 
-    row[key]?.length > 0 &&
-    row[key].map((item) => (
+  {(row.rule === "specificCollection" && row.collections.length > 0) &&
+    row.collections.map((item) => (
       <div key={item.value} className="bg-[#E3E3E3] rounded text-[#303030] justify-center px-2 py-[2px] items-center flex space-x-1">
         <span>{item.value}</span>
         <VscClose 
-          onClick={() => updateRow(row.id, key, row[key].filter((i) => i.value !== item.value))} 
+          onClick={() => updateRow(row.id, "collections", row.collections.filter((i) => i.value !== item.value))} 
           className="cursor-pointer" 
           size={16} 
         />
       </div>
     ))
-  )}
+  }
+
+  {(row.rule === "specificProduct" && row.products.length > 0) &&
+    row.products.map((item) => (
+      <div key={item.value} className="bg-[#E3E3E3] rounded text-[#303030] justify-center px-2 py-[2px] items-center flex space-x-1">
+        <span>{item.value}</span>
+        <VscClose 
+          onClick={() => updateRow(row.id, "products", row.products.filter((i) => i.value !== item.value))} 
+          className="cursor-pointer" 
+          size={16} 
+        />
+      </div>
+    ))
+  }
+
+  {(row.rule === "productTags" && row.productTags.length > 0) &&
+    row.productTags.map((item) => (
+      <div key={item.value} className="bg-[#E3E3E3] rounded text-[#303030] justify-center px-2 py-[2px] items-center flex space-x-1">
+        <span>{item.value}</span>
+        <VscClose 
+          onClick={() => updateRow(row.id, "productTags", row.productTags.filter((i) => i.value !== item.value))} 
+          className="cursor-pointer" 
+          size={16} 
+        />
+      </div>
+    ))
+  }
 </div>
       {/* display selected collections, products, product tags  --end */}
      </div>
