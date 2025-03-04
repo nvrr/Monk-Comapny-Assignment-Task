@@ -26,6 +26,10 @@ export default function EligibilityRules() {
    // Calculate height dynamically 
    const lineRefs = useRef({});
    const [lineStyles, setLineStyles] = useState({});
+
+   useEffect(() => {
+    console.log("Updated rows state:", JSON.stringify(rows, null, 2));
+  }, [rows]);
  
    // Only run animation effect when rows change
   useEffect(() => {
@@ -73,53 +77,56 @@ export default function EligibilityRules() {
   });
 };
 
-  // Function to update a row 
-  const updateRow = useCallback((id, field, value) => {
-    setRows((prevRows) => {
-      const updatedRows = prevRows.map(row =>
-        row.id === id ? { ...row, [field]: value } : row
-      );
-
-      return field === "rule" ? sortRowsByPriority(updatedRows) : updatedRows;
-    });
-  }, []);
+const updateRow = useCallback((id, field, value) => {
+  setRows((prevRows) => {
+    const updatedRows = prevRows.map(row => ({
+      ...row,
+      [field]: value,  // Apply the same value to all rows
+    }));
+    return updatedRows;
+  });
+}, []);
 
 
 // Function to add a new rule row
 const addRow = useCallback(() => {
-  const availableRule = EligibilityRulesData
-    .filter(rule => !selectedRules.includes(rule.value))
-    .sort((a, b) => a.priority - b.priority)[0];
+  setRows((prevRows) => {
+    const availableRule = EligibilityRulesData.find(
+      (rule) => !prevRows.some((row) => row.rule === rule.value)
+    );
 
-  if (!availableRule) return;
+    if (!availableRule) return prevRows; // Prevent adding duplicate rules
 
-  const newRow = {
-    id: Date.now(),
-    rule: availableRule.value,
-    specificCollectionOperator: "contains any",
-    specificProductOperator: "equals anything",
-    productTagOperator: 'contains any',
-    textCode: "",
-    collections: [],
-    productTags: [],
-    products: [],
-    subscribed: 'yes',
-    currency: "USD",
-    minValue: "",
-    maxValue: "",
-    cartRangeOperator: "is between",
-  };
+    const newRow = {
+      id: Date.now(),
+      rule: availableRule.value,
+      specificCollectionOperator: "contains any",
+      specificProductOperator: "equals anything",
+      productTagOperator: "contains any",
+      textCode: "",
+      collections: [],
+      productTags: [],
+      products: [],
+      subscribed: "yes",
+      currency: "USD",
+      minValue: "",
+      maxValue: "",
+      cartRangeOperator: "is between",
+    };
 
-  setRows(prevRows => sortRowsByPriority([...prevRows, newRow]));
-}, [selectedRules]);
+    return sortRowsByPriority([...prevRows, newRow]);
+  });
+}, []);
 
 // Remove row function
 const removeRow = (id) => {
   setRows((prevRows) => {
     const updatedRows = prevRows.filter((row) => row.id !== id);
     return updatedRows;
-  });
+  },[]);
 };
+
+
 
   const getOperators = useCallback((ruleId) => {
     const rule = EligibilityRulesData.find((rule) => rule.value === ruleId);
@@ -135,7 +142,20 @@ const selectedRuleConfig = EligibilityRulesData.find((config) => config.value ==
 const data = selectedRuleConfig ? selectedRuleConfig.data : [];
 const operators = selectedRuleConfig ? selectedRuleConfig.operators : [];
 // console.log("Line height:", lineStyles[row.id]?.height);
-  
+// console.log('specificCollectionOperator:',row.specificCollectionOperator, 
+// );
+// console.log('specificProductOperator:',row.specificProductOperator ,)
+// console.log('productTagOperator:',row.productTagOperator, )
+// console.log('------productSubscribed-----:',row.productSubscribed,)
+// console.log('------specificDiscountCodes-----:',row.specificDiscountCodes,)
+// console.log('-----collections-----:',row.collections,)
+// console.log('-----productTags------:',row.productTags,)
+// console.log('-----products------:',row.products,)
+// console.log('-----currency--------:',row.currency,)
+// console.log('----minValue----:',row.minValue,)
+// console.log('---maxValue----:',row.maxValue,)
+// console.log('--cartRangeOperator---:',row.cartRangeOperator)
+
         return(
         <div key={row.id} id={`row-${row.id}`} className='relative'>
         {index===0 &&  <div className="bg-white h-5 w-5 absolute z-10 -left-10"></div>}
@@ -227,34 +247,38 @@ const operators = selectedRuleConfig ? selectedRuleConfig.operators : [];
 { (operators.length > 0 && row.rule==="specificCollection" ) && (
                 <div className="w-1/2">
                   <OptionsInput
-                    value={row.specificCollectionOperator}
-                    setValue={(value) => updateRow(row.id, "specificCollectionOperator", value)}
-                    options={getOperators(row.rule)} // Extract only values}}
-                    disabledOptions={
-                      rows
-                        .filter((r) => r.rule === "specificProduct") // Find rows where rule is "specificProduct"
-                        .map((r) => r.inclusiveExclusive) // Get the selected operator of "specificProduct"
-                        .filter(Boolean) // Remove undefined/null values
-                    }
-    
-                  />
+      value={row.specificCollectionOperator}
+      setValue={(value) => updateRow(row.id, "specificCollectionOperator", value)}
+      options={getOperators(row.rule)} 
+      disabledOptions={
+        rows
+          .filter((r) => r.rule === "specificProduct") // Find specificProduct rule
+          .flatMap((r) => 
+            ["contains any", "is not"].includes(r.specificProductOperator) 
+              ? [r.specificProductOperator] 
+              : []
+          )
+      }
+    />
                 </div>
               )}
 
 { (operators.length > 0 && row.rule==="specificProduct" ) && (
                 <div className="w-1/2">
                   <OptionsInput
-                    value={row.specificProductOperator}
-                    setValue={(value) => updateRow(row.id, "specificProductOperator", value)}
-                    options={getOperators(row.rule)} // Extract only values}}
-                    disabledOptions={
-                      rows
-                        .filter((r) => r.rule === "specificCollection") // Find all selected specificCollection operators
-                        .map((r) => r.specificCollectionOperator) // Extract their values
-                        .filter(Boolean) // Remove empty values
-                    }
-    
-                  />
+      value={row.specificProductOperator}
+      setValue={(value) => updateRow(row.id, "specificProductOperator", value)}
+      options={getOperators(row.rule)} 
+      disabledOptions={
+        rows
+          .filter((r) => r.rule === "specificCollection") // Find specificCollection rule
+          .flatMap((r) => 
+            ["contains any", "is not"].includes(r.specificCollectionOperator) 
+              ? [r.specificCollectionOperator] 
+              : []
+          )
+      }
+    />
                 </div>
               )}
       </div>
