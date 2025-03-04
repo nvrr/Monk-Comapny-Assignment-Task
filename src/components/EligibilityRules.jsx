@@ -348,7 +348,7 @@ const operators = selectedRuleConfig ? selectedRuleConfig.operators : [];
     <div className="grid justify-center">
     <button
         onClick={addRow}
-        className="cursor-pointer border border-[#8A8A8A] my-6 justify-center px-4 py-2 text-[#303030] rounded flex items-center"
+        className={`${EligibilityRulesData.length === rows.length && 'bg-[#8A8A8A] text-white' } cursor-pointer border border-[#8A8A8A] my-6 justify-center px-4 py-2 text-[#303030] rounded flex items-center`}
       >
         <FiPlus className="mr-2" /> AND
       </button>
