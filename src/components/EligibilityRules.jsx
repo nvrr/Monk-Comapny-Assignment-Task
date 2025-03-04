@@ -123,13 +123,14 @@ const updateRow = useCallback((id, field, value) => {
     );
 
     if (field === "rule") {
-      return sortRowsByPriority(updatedRows); // Sort after rule update
+      return sortRowsByPriority(updatedRows); 
     }
 
     return updatedRows;
   });
 }, []);
 
+//all operators
   const getOperators = useCallback((ruleId) => {
     const rule = EligibilityRulesData.find((rule) => rule.value === ruleId);
     return rule?.operators || [];
