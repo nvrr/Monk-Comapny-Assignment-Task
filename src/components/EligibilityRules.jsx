@@ -138,7 +138,7 @@ const updateRow = useCallback((id, field, value) => {
 
   
   return (
-    <div className=" pl-12 pr-4 p-2">
+    <div className=" pl-12 pr-4 p-2 overflow-y-auto">
       
       {rows.map((row, index) =>{
 const selectedRuleConfig = EligibilityRulesData.find((config) => config.value === row.rule);
@@ -290,6 +290,7 @@ const operators = selectedRuleConfig ? selectedRuleConfig.operators : [];
          
          {(row.rule === "specificCollection") 
          && <SelectMultiOptionsInput
+         
           values={row.collections}
           setValues={(value) => updateRow(row.id, "collections", value)}
           data={EligibilityRulesData.find((config) => config.value === row.rule)?.data || []}
@@ -353,7 +354,7 @@ const operators = selectedRuleConfig ? selectedRuleConfig.operators : [];
       </div>
   
       {/* display selected collections, products, product tags  --start */}
-      <div className="flex flex-wrap gap-2 items-center mt-2 mb-5 pl-2">
+      <div data-testId='collection-items' className="flex flex-wrap gap-2 items-center mt-2 mb-5 pl-2">
   {(row.rule === "specificCollection" && row.collections.length > 0) &&
     row.collections.map((item) => (
       <div key={item.value} className="bg-[#E3E3E3] rounded text-[#303030] justify-center px-2 py-[2px] items-center flex space-x-1">

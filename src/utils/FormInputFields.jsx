@@ -174,6 +174,7 @@ return (
       <div className="flex items-center px-2 border border-[#8A8A8A] text-[#303030] rounded bg-white cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
         <LuSearch className="text-gray-400 mr-1 mt-1" size={18}/>
       <input
+      data-testId='rule-selector'
         type="text"
         placeholder={placeholder}
         className="w-full p-0 focus:outline-none h-[38.5px] focus:outline-none focus:border-[#8A8A8A]"
