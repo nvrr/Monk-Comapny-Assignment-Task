@@ -1,4 +1,4 @@
-import { React, useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import { React, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { VscClose } from "react-icons/vsc";
 import { FiPlus } from "react-icons/fi";
 import { OptionsInput, SelectCurrencyRangeAmountInput, SelectMultiOptionsInput, TextField } from "../utils/FormInputFields";
@@ -6,11 +6,8 @@ import { EligibilityRulesData } from "../data/EligibilityRulesData";
 
 export default function EligibilityRules() {
 
-  
-
-   const initialState = [
-    {
-      id: Date.now(),
+  const [rows, setRows] = useState([{ 
+    id: Date.now(),
       rule: "specificCollection",
       specificCollectionOperator: "contains any",
       specificProductOperator: "equals anything",
@@ -24,102 +21,114 @@ export default function EligibilityRules() {
       minValue: "",
       maxValue: "",
       cartRangeOperator: "is between"
-    }
-  ];
+   }]);
 
-       // creates rules priority object
-       const rulePriorityMap = useMemo(() => {
-        //     const map = {};
-        // for (const rule of EligibilityRulesData) {
-        //   map[rule.value] = rule.priority || 0;
-        // }
-        // return map;  // {k:v, k:v,...}
-      
-        // Object.fromEntries(
-        //   EligibilityRulesData.map(rule => [rule.value, rule.priority || 0])
-        // ), [[k,v],[k,v]] => fromEntries converts into object k,v pairs [[k,v],[k,v]] => {k:v, k:v}
-            return EligibilityRulesData.reduce((acc, rule) => {
-              acc[rule.value] = rule.priority || 0; // Store rule priority in an object
-              return acc;
-            }, {});
-          }, []); //0/p is return in objec key,values , 
-      
-       // Function to sort rows based on rule priority
-       const sortRowsByPriority = (rows) => {
-        return [...rows].sort((a, b) => {
-          const priorityA = rulePriorityMap[a.rule] || 0;
-          const priorityB = rulePriorityMap[b.rule] || 0;
-          return priorityA - priorityB;
-        });
-      };
-      
-  
-  function rowsReducer(state, action) {
-    switch (action.type) {
-      case "ADD_ROW":
-  const availableRule = EligibilityRulesData.find(
-    (rule) => !state.some((row) => row.rule === rule.value)
-  );
-  if (!availableRule) return state;
-
-  const newRow = {
-    id: Date.now(),
-    rule: availableRule.value,
-    specificCollectionOperator: "contains any",
-    specificProductOperator: "equals anything",
-    productTagOperator: "contains any",
-    subscribed: "yes",
-    textCode: "",
-    collections: [],
-    productTags: [], // 👈 MUST be here
-    products: [],
-    currency: "USD",
-    minValue: "",
-    maxValue: "",
-    cartRangeOperator: "is between"
-  };
-  return sortRowsByPriority([...state, newRow]);
-  
-      case "REMOVE_ROW":
-        return sortRowsByPriority(state.filter(row => row.id !== action.id));
-  
-      case "UPDATE_ROW":
-        const updated = state.map(row =>
-          row.id === action.id
-            ? { ...row, [action.field]: action.value }
-            : row
-        );
-        return action.field === "rule" ? sortRowsByPriority(updated) : updated;
-  
-      default:
-        return state;
-    }
-  }
-
-  const [rows, dispatch] = useReducer(rowsReducer, initialState);
+   // Calculate height dynamically 
+   const lineRefs = useRef({});
+   const [lineStyles, setLineStyles] = useState({});
 
    useEffect(() => {
     console.log("Updated rows state:", JSON.stringify(rows, null, 2));
+  }, [rows]);
+ 
+   // Only run animation effect when rows change
+  useEffect(() => {
+    const updateLinePositions = () => {
+      const newStyles = {};
+      rows.forEach((row, index) => {
+        if (index > 0) {
+          const prevRow = document.getElementById(`row-${rows[index - 1].id}`);
+          const currentRow = document.getElementById(`row-${row.id}`);
+
+          if (prevRow && currentRow) {
+            const prevBottom = prevRow.getBoundingClientRect().bottom;
+            const currentTop = currentRow.getBoundingClientRect().top;
+            const distance = currentTop - prevBottom;
+            newStyles[row.id] = { height: distance };
+          }
+        }
+      });
+      setLineStyles((prev) => (JSON.stringify(prev) === JSON.stringify(newStyles) ? prev : newStyles));
+    };
+
+    updateLinePositions();
+    window.addEventListener("resize", updateLinePositions);
+    return () => window.removeEventListener("resize", updateLinePositions);
   }, [rows]);
 
      // Get all selected rules
      const selectedRules = useMemo(() => rows.map(row => row.rule), [rows]);
 
 
+     // creates rules priority object
+     const rulePriorityMap = useMemo(() => {
+      return EligibilityRulesData.reduce((acc, rule) => {
+        acc[rule.value] = rule.priority || 0; // Store rule priority in an object
+        return acc;
+      }, {});
+    }, []);
+
+ // Function to sort rows based on rule priority
+ const sortRowsByPriority = (rows) => {
+  return [...rows].sort((a, b) => {
+    const priorityA = rulePriorityMap[a.rule] || 0;
+    const priorityB = rulePriorityMap[b.rule] || 0;
+    return priorityA - priorityB;
+  });
+};
+
 // Function to add a new rule row
-const addRow = () => {
-  dispatch({ type: "ADD_ROW" });
-}
+const addRow = useCallback(() => {
+  setRows((prevRows) => {
+    const availableRule = EligibilityRulesData.find(
+      (rule) => !prevRows.some((row) => row.rule === rule.value)
+    );
+
+    if (!availableRule) return prevRows; // Prevent adding duplicate rules
+
+    const newRow = {
+      id: Date.now(),
+      rule: availableRule.value,
+      specificCollectionOperator: "contains any",
+      specificProductOperator: "equals anything",
+      productTagOperator: "contains any",
+      textCode: "",
+      collections: [],
+      productTags: [],
+      products: [],
+      subscribed: "yes",
+      currency: "USD",
+      minValue: "",
+      maxValue: "",
+      cartRangeOperator: "is between",
+    };
+
+    return sortRowsByPriority([...prevRows, newRow]);
+  });
+}, []);
 
 // Remove rule row 
-const removeRow =(id) => {
-  dispatch({ type: "REMOVE_ROW", id });
-}
+const removeRow = (id) => {
+  setRows((prevRows) => {
+    const updatedRows = prevRows.filter((row) => row.id !== id);
+    return sortRowsByPriority(updatedRows);
+  },[]);
+};
 
 // update rule row
-const updateRow = (id, field, value) => {
-  dispatch({ type: "UPDATE_ROW", id, field, value });
-}
+const updateRow = useCallback((id, field, value) => {
+  setRows((prevRows) => {
+    const updatedRows = prevRows.map(row =>
+      row.id === id ? { ...row, [field]: value } : row
+    );
+
+    if (field === "rule") {
+      return sortRowsByPriority(updatedRows); 
+    }
+
+    return updatedRows;
+  });
+}, []);
 
 //all operators
   const getOperators = useCallback((ruleId) => {
@@ -127,7 +136,7 @@ const updateRow = (id, field, value) => {
     return rule?.operators || [];
   }, []);
 
-  console.log('rrrrr',rows);
+  
   return (
     <div className=" pl-12 pr-4 p-2 overflow-y-auto">
       
@@ -158,9 +167,9 @@ const operators = selectedRuleConfig ? selectedRuleConfig.operators : [];
        
           {index > 0 && (
             <div
-             
+              ref={(el) => (lineRefs.current[row.id] = el)}
               className="absolute -left-12"
-              style={{ height: "50px", top: "-25px" }}
+              style={{ height: `${lineStyles[row.id]?.height || 50}px`, top: "-25px" }}
             >
 
               <div className="relative min-h-[1px] w-10">
@@ -372,7 +381,7 @@ const operators = selectedRuleConfig ? selectedRuleConfig.operators : [];
     ))
   }
 
-  {(row.rule === "productTags" && row?.productTags?.length > 0) &&
+  {(row.rule === "productTags" && row.productTags.length > 0) &&
     row.productTags.map((item) => (
       <div key={item.value} className="bg-[#E3E3E3] rounded text-[#303030] justify-center px-2 py-[2px] items-center flex space-x-1">
         <span>{item.value}</span>
