@@ -29,26 +29,18 @@ export default function EligibilityRules() {
 
        // creates rules priority object
        const rulePriorityMap = useMemo(() => {
-        //     const map = {};
-        // for (const rule of EligibilityRulesData) {
-        //   map[rule.value] = rule.priority || 0;
-        // }
-        // return map;  // {k:v, k:v,...}
-      
-        // Object.fromEntries(
-        //   EligibilityRulesData.map(rule => [rule.value, rule.priority || 0])
-        // ), [[k,v],[k,v]] => fromEntries converts into object k,v pairs [[k,v],[k,v]] => {k:v, k:v}
-            return EligibilityRulesData.reduce((acc, rule) => {
-              acc[rule.value] = rule.priority || 0; // Store rule priority in an object
-              return acc;
-            }, {});
-          }, []); //0/p is return in objec key,values , 
+            const map = {};
+        for (const rule of EligibilityRulesData) {
+          map[rule.value] = rule.priority;
+        }
+        return map;  // {k:v, k:v,...}
+      }); 
       
        // Function to sort rows based on rule priority
        const sortRowsByPriority = (rows) => {
         return [...rows].sort((a, b) => {
-          const priorityA = rulePriorityMap[a.rule] || 0;
-          const priorityB = rulePriorityMap[b.rule] || 0;
+          const priorityA = rulePriorityMap[a.rule];
+          const priorityB = rulePriorityMap[b.rule];
           return priorityA - priorityB;
         });
       };
@@ -57,9 +49,13 @@ export default function EligibilityRules() {
   function rowsReducer(state, action) {
     switch (action.type) {
       case "ADD_ROW":
-  const availableRule = EligibilityRulesData.find(
-    (rule) => !state.some((row) => row.rule === rule.value)
-  );
+  // Get list of rule values already in use
+const usedRuleValues = state.map((row) => row.rule);
+
+// Find the first rule that hasn't been used yet
+const availableRule = EligibilityRulesData.find((rule) => {
+  return !usedRuleValues.includes(rule.value);
+});
   if (!availableRule) return state;
 
   const newRow = {
@@ -71,7 +67,7 @@ export default function EligibilityRules() {
     subscribed: "yes",
     textCode: "",
     collections: [],
-    productTags: [], // 👈 MUST be here
+    productTags: [], 
     products: [],
     currency: "USD",
     minValue: "",
@@ -98,9 +94,6 @@ export default function EligibilityRules() {
 
   const [rows, dispatch] = useReducer(rowsReducer, initialState);
 
-   useEffect(() => {
-    console.log("Updated rows state:", JSON.stringify(rows, null, 2));
-  }, [rows]);
 
      // Get all selected rules
      const selectedRules = useMemo(() => rows.map(row => row.rule), [rows]);
@@ -392,6 +385,7 @@ const operators = selectedRuleConfig ? selectedRuleConfig.operators : [];
     <div className="grid justify-center">
     <button
         onClick={addRow}
+        disabled={EligibilityRulesData.length === rows.length}
         className={`${EligibilityRulesData.length === rows.length && 'bg-[#8A8A8A] text-white' } cursor-pointer border border-[#8A8A8A] my-6 justify-center px-4 py-2 text-[#303030] rounded flex items-center`}
       >
         <FiPlus className="mr-2" /> AND
